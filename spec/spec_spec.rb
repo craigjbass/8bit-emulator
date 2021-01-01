@@ -1,11 +1,51 @@
 require 'fiber'
 
+class Nop
+  def initialize(processor)
+    @processor = processor
+  end
+
+  def run()
+    pc = @processor.instance_variable_get(:@program_counter) 
+    @processor.instance_variable_set(:@program_counter, pc + 1)
+  end
+end
+
+class Halt
+  def initialize(processor)
+    @processor = processor
+  end
+
+  def run
+    @processor.instance_variable_set(:@running, false)
+    pc = @processor.instance_variable_get(:@program_counter) 
+    @processor.instance_variable_set(:@program_counter, pc + 1)
+  end
+end
+
+class Jump
+  def initialize(processor)
+    @processor = processor
+  end
+
+  def run
+    pc = @processor.instance_variable_get(:@program_counter) 
+    operand = @processor.instance_variable_get(:@ram)[pc + 1]
+    @processor.instance_variable_set(:@program_counter, operand)
+  end
+end
+
 class Processor
   def initialize
     @program_counter = 0x00
     @ram = (0x00..0xFF).map { 0x00 } 
     @running = false
     @fiber = nil
+    @instructions = {
+      0x00 => Halt,
+      0x01 => Nop,
+      0x28 => Jump,
+    }
   end
 
   def start
@@ -13,14 +53,7 @@ class Processor
     @fiber = Fiber.new do
       while @running
         Fiber.yield
-        if @ram[@program_counter] == 0x28
-          @program_counter = @ram[@program_counter + 0x01]
-        elsif @ram[@program_counter] == 0x01
-          @program_counter += 1
-        elsif @ram[@program_counter] == 0x00
-          @running = false
-          @program_counter += 1
-        end
+        @instructions[@ram[@program_counter]].new(self).run
       end
     end
 
@@ -47,8 +80,8 @@ class Processor
     @ram[address]
   end
 
-  def halted
-    true
+  def halted?
+    !@running
   end
 
   def program_counter
@@ -67,7 +100,7 @@ describe Processor do
     processor = described_class.new
     processor.start
 
-    expect(processor.halted).to be(true)
+    expect(processor.halted?).to be(true)
     expect(processor.program_counter).to be(0x01)
   end
 
@@ -76,7 +109,7 @@ describe Processor do
     processor.start
     processor.start
 
-    expect(processor.halted).to be(true)
+    expect(processor.halted?).to be(true)
     expect(processor.program_counter).to be(0x02)
   end
 
@@ -106,6 +139,14 @@ describe Processor do
     processor = described_class.new
     processor.goto 0x2F
     expect(processor.program_counter).to eq(0x2F)
+  end
+
+  it 'can nop and not halt' do
+    processor = described_class.new
+    processor.store 0x01
+    processor.goto 0x00
+    processor.start 
+    expect(processor.halted?).to be(false)
   end
 
   it 'can nop and halt' do
