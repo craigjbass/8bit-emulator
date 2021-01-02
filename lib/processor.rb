@@ -52,6 +52,17 @@ class Processor
     !@state.running
   end
 
+  def data_leds
+    @state.ram[0xFF]
+  end
+
+  def address_leds
+    if @state.ram[0xFC][2] == 1
+      return @state.ram[0xFE]
+    end
+    @state.program_counter
+  end
+
   def program_counter
     @state.program_counter
   end
