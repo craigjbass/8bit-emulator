@@ -10,6 +10,8 @@ class Assembler
       jump: [0x28, 1],
       copyla: [0x04, 1],
       copylr: [0x05, 2],
+      copyar: [0x07, 1],
+      copyra: [0x09, 1],
       mul: [0x15, 2],
       comin: [0xC1, 0],
       comout: [0xC0, 0],

@@ -11,6 +11,14 @@ def day_1
     comin
     comin
     comin
+    copyar 0xE0
+    comin
+    comin
+    comin
+    comin
+    copyar 0xE1
+    mul 0xE0, 0xE1 
+    copyra 0xE0
     comout
   end
 end

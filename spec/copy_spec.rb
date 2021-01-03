@@ -22,4 +22,28 @@ describe 'COPY* instructions' do
       expect(processor.ram_at(0x48)).to eq(0x72)
       expect(processor.ram_at(0xFC)[0]).to eq(1)
   end
+
+  it 'can COPYAR' do
+      processor = Assembler.run do
+        copyla 0x13
+        copylr 0x00, 0xFC
+        copyar 0x10
+      end
+      processor.until_finished
+      expect(processor.program_counter).to eq(0x08)
+      expect(processor.ram_at(0x10)).to eq(0x13)
+      expect(processor.ram_at(0xFC)[0]).to eq(1)
+  end
+
+  it 'can COPYRA' do
+      processor = Assembler.run do
+        copylr 0x19, 0xE0
+        copylr 0x00, 0xFC
+        copyra 0xE0
+      end
+      processor.until_finished
+      expect(processor.program_counter).to eq(0x09)
+      expect(processor.accumulator).to eq(0x19)
+      expect(processor.ram_at(0xFC)[0]).to eq(1)
+  end
 end

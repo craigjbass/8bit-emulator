@@ -6,6 +6,8 @@ require 'nop'
 require 'state'
 require 'copy_literal_to_accumulator'
 require 'copy_literal_to_ram'
+require 'copy_accumulator_to_ram'
+require 'copy_ram_to_accumulator'
 require 'multiply'
 require 'com_in'
 require 'com_out'
@@ -20,6 +22,8 @@ class Processor
       0x28 => Jump,
       0x04 => CopyLiteralToAccumulator,
       0x05 => CopyLiteralToRam,
+      0x07 => CopyAccumulatorToRam,
+      0x09 => CopyRamToAccumulator,
       0x15 => Multiply,
       0xC1 => ComIn,
       0xC0 => ComOut,
