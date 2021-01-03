@@ -4,6 +4,9 @@ require 'halt'
 require 'jump'
 require 'nop'
 require 'state'
+require 'copy_literal_to_accumulator'
+require 'com_in'
+require 'com_out'
 
 class Processor
   def initialize
@@ -13,6 +16,9 @@ class Processor
       0x00 => Halt,
       0x01 => Nop,
       0x28 => Jump,
+      0x04 => CopyLiteralToAccumulator,
+      0xC1 => ComIn,
+      0xC0 => ComOut,
     }
   end
 
@@ -35,6 +41,14 @@ class Processor
     end
   end
 
+  def until_finished
+    unless halted?
+      @fiber.resume
+    end
+    @fiber.resume
+    self
+  end
+
   def goto(address)
     @state.program_counter = address
   end
@@ -46,6 +60,16 @@ class Processor
 
   def ram_at(address)
     @state.ram[address]
+  end
+
+  def send_com(byte)
+    @state.send_com(byte)
+  end
+
+  def receive_com
+    buffer = @state.com_out_buffer
+    @state.com_out_buffer = []
+    buffer
   end
 
   def halted?
@@ -65,5 +89,9 @@ class Processor
 
   def program_counter
     @state.program_counter
+  end
+
+  def accumulator
+    @state.accumulator
   end
 end

@@ -1,50 +1,5 @@
 require 'processor'
-
-class DigiruleDsl
-  class InvalidOperands < RuntimeError; end
-  class NoSuchInstruction < RuntimeError; end
-
-  def initialize(processor)
-    @processor = processor
-    @mappings = {
-      halt: [0x00, 0],
-      nop: [0x01, 0],
-      jump: [0x28, 1],
-    }
-  end
-
-  def self.run(&block)
-    processor = Processor.new
-    self.new(processor).run(&block)
-    processor
-  end
-
-  def run(&block)
-    initial = @processor.program_counter
-    instance_eval(&block)
-    @processor.goto initial
-    @processor.start
-  end
-
-  def method_missing(method, *operands)
-    instruction = @mappings[method]
-    raise NoSuchInstruction if instruction.nil?
-
-    raise_if_unexpected_operands(instruction, operands)
-
-    instruction_opcode = instruction[0]
-    @processor.store instruction_opcode
-
-    operands.each do |operand|
-      @processor.store operand
-    end
-  end
-
-  def raise_if_unexpected_operands(instruction, operands)
-    expected_number_of_operands = instruction[1] 
-    raise InvalidOperands if operands.length != expected_number_of_operands 
-  end
-end
+require 'assembler'
 
 class ProcessorSpy
   attr_reader :machine_code
@@ -54,6 +9,7 @@ class ProcessorSpy
   end
 
   def program_counter
+    0x00
   end
 
   def goto(address)
@@ -67,7 +23,7 @@ class ProcessorSpy
   end
 end
 
-describe DigiruleDsl do
+describe Assembler do
   it 'fails on missing instruction' do
     expect do 
       described_class.run do
@@ -106,5 +62,14 @@ describe DigiruleDsl do
         jump
       end
     end.to raise_error(described_class::InvalidOperands)
+  end
+
+  it 'can label' do
+    spy = ProcessorSpy.new
+    described_class.new(spy).run do
+      beginning = label
+      jump beginning
+    end
+    expect(spy.machine_code).to eq([0x28, 0x00])
   end
 end
