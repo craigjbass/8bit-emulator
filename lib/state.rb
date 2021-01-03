@@ -29,10 +29,11 @@ class State
   end
 
   def receive_com
-    @com_data.pop
+    @com_data.shift
   end
 
   def com_data_available?
     @com_data.length > 0
   end
 end
+

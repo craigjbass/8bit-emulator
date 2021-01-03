@@ -9,6 +9,8 @@ class Assembler
       nop: [0x01, 0],
       jump: [0x28, 1],
       copyla: [0x04, 1],
+      copylr: [0x05, 2],
+      mul: [0x15, 2],
       comin: [0xC1, 0],
       comout: [0xC0, 0],
     }

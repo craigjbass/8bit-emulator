@@ -5,6 +5,8 @@ require 'jump'
 require 'nop'
 require 'state'
 require 'copy_literal_to_accumulator'
+require 'copy_literal_to_ram'
+require 'multiply'
 require 'com_in'
 require 'com_out'
 
@@ -17,6 +19,8 @@ class Processor
       0x01 => Nop,
       0x28 => Jump,
       0x04 => CopyLiteralToAccumulator,
+      0x05 => CopyLiteralToRam,
+      0x15 => Multiply,
       0xC1 => ComIn,
       0xC0 => ComOut,
     }
@@ -42,10 +46,9 @@ class Processor
   end
 
   def until_finished
-    unless halted?
+    while !halted?
       @fiber.resume
     end
-    @fiber.resume
     self
   end
 
