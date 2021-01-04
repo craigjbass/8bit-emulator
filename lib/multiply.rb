@@ -8,6 +8,7 @@ class Multiply
     product_address = @state.next
     multiplier_address = @state.next
     result = @state.ram[product_address] * @state.ram[multiplier_address]
+    result = result % 256
     @state.ram[product_address] = result
   end
 end
