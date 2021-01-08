@@ -11,6 +11,16 @@ describe 'COPY* instructions' do
       expect(processor.program_counter).to eq(0x02)
       expect(processor.ram_at(0xFC)[0]).to eq(1)
     end
+
+    it 'can COPYRR' do
+      address = rand(0xE0..0xEF)
+      processor = Assembler.run do
+        copylr operand, address
+        copyrr address, address + 1
+      end
+      processor.until_finished
+      expect(processor.ram_at(address + 1)).to eq(operand)
+    end
   end
 
   it 'can COPYLR' do
@@ -26,7 +36,7 @@ describe 'COPY* instructions' do
   it 'can COPYAR' do
       processor = Assembler.run do
         copyla 0x13
-        copylr 0x00, 0xFC
+        bclr 0x00, 0xFC
         copyar 0x10
       end
       processor.until_finished
@@ -38,7 +48,7 @@ describe 'COPY* instructions' do
   it 'can COPYRA' do
       processor = Assembler.run do
         copylr 0x19, 0xE0
-        copylr 0x00, 0xFC
+        bclr 0x00, 0xFC
         copyra 0xE0
       end
       processor.until_finished

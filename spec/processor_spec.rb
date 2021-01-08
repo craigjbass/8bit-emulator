@@ -82,6 +82,20 @@ describe Processor do
     processor.continue_for 1
     expect(processor.program_counter).to eq(0x06)
   end
+
+  it 'can recognise invalid memory values (upper bound)' do
+    processor.store 0xFF + 1
+    expect do
+      processor.start
+    end.to raise_error(State::MemoryHasInvalidValue)
+  end
+
+  it 'can recognise invalid memory values (lower bound)' do
+    processor.store 0x00 - 1
+    expect do
+      processor.start
+    end.to raise_error(State::MemoryHasInvalidValue)
+  end
 end
 
 

@@ -1,16 +1,23 @@
 require 'fiber'
 require 'instruction'
-require 'halt'
-require 'jump'
-require 'nop'
-require 'state'
-require 'copy_literal_to_accumulator'
-require 'copy_literal_to_ram'
-require 'copy_accumulator_to_ram'
-require 'copy_ram_to_accumulator'
-require 'multiply'
+require 'add_literal_to_accumulator'
+require 'add_ram_to_accumulator'
+require 'bit_clear'
+require 'bit_set'
 require 'com_in'
 require 'com_out'
+require 'copy_accumulator_to_ram'
+require 'copy_literal_to_accumulator'
+require 'copy_literal_to_ram'
+require 'copy_ram_to_accumulator'
+require 'copy_ram_to_ram'
+require 'decrement'
+require 'decrement_and_jump_two_if_zero'
+require 'halt'
+require 'jump'
+require 'multiply'
+require 'nop'
+require 'state'
 
 class Processor
   def initialize
@@ -24,7 +31,14 @@ class Processor
       0x05 => CopyLiteralToRam,
       0x07 => CopyAccumulatorToRam,
       0x09 => CopyRamToAccumulator,
+      0x0A => CopyRamToRam,
+      0x11 => AddLiteralToAccumulator,
+      0x12 => AddRamToAccumulator,
       0x15 => Multiply,
+      0x23 => BitClear,
+      0x24 => BitSet,
+      0x1D => Decrement,
+      0x1F => DecrementAndJumpTwoIfZero,
       0xC1 => ComIn,
       0xC0 => ComOut,
     }
@@ -36,6 +50,7 @@ class Processor
       while @state.running
         Fiber.yield
         @instructions[@state.data].new(@state).run
+        @state.integrity_check
       end
     end
 

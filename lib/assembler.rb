@@ -12,7 +12,14 @@ class Assembler
       copylr: [0x05, 2],
       copyar: [0x07, 1],
       copyra: [0x09, 1],
+      copyrr: [0x0A, 2],
+      addla: [0x11, 1],
+      addra: [0x12, 1],
       mul: [0x15, 2],
+      bclr: [0x23, 2],
+      bset: [0x24, 2],
+      decr: [0x1D, 1],
+      decrjz: [0x1F, 1],
       comin: [0xC1, 0],
       comout: [0xC0, 0],
     }
@@ -37,7 +44,7 @@ class Assembler
 
   def method_missing(method, *operands)
     instruction = @mappings[method]
-    raise NoSuchInstruction if instruction.nil?
+    raise NoSuchInstruction.new(method) if instruction.nil?
 
     raise_if_unexpected_operands(instruction, operands)
 

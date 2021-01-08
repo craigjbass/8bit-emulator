@@ -21,7 +21,17 @@ class State
   end
 
   def set_zero_bit
-    @ram[0xFC] = @ram[0xFC][0] | 0x01
+    mask = 0x01
+    @ram[0xFC] = @ram[0xFC] | mask 
+  end
+
+  def set_carry_flag
+    mask = 0x02
+    @ram[0xFC] = @ram[0xFC] | mask
+  end
+
+  def carry_flag
+    @ram[0xFC][1]
   end
 
   def send_com(byte)
@@ -34,6 +44,15 @@ class State
 
   def com_data_available?
     @com_data.length > 0
+  end
+
+  class MemoryHasInvalidValue < RuntimeError; end
+
+  def integrity_check
+    @ram.each_with_index do |value, address|
+      raise MemoryHasInvalidValue.new("0x#{value.to_s(16)} at 0x#{address.to_s(16)} is greater than 0xFF") if value > 0xFF
+      raise MemoryHasInvalidValue.new("0x#{value.to_s(16)} at 0x#{address.to_s(16)} is less than 0x00") if value < 0x00
+    end
   end
 end
 
