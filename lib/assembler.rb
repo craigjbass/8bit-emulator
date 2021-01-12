@@ -2,6 +2,8 @@ class Assembler
   class InvalidOperands < RuntimeError; end
   class NoSuchInstruction < RuntimeError; end
 
+  attr_reader :end_of_program, :processor
+
   def initialize(processor)
     @processor = processor
     @mappings = {
@@ -26,14 +28,20 @@ class Assembler
   end
 
   def self.run(&block)
+    assembler = self.create()
+    assembler.run(&block)
+    assembler.processor
+  end
+
+  def self.create
     processor = Processor.new
-    self.new(processor).run(&block)
-    processor
+    self.new(processor)
   end
 
   def run(&block)
     initial = @processor.program_counter
     instance_eval(&block)
+    @end_of_program = @processor.program_counter
     @processor.goto initial
     @processor.start
   end
