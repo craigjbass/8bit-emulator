@@ -48,6 +48,8 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.10.0)
     rspec-support (3.10.1)
+    rubyserial (0.6.0)
+      ffi (~> 1.9, >= 1.9.3)
     shellany (0.0.1)
     thor (1.0.1)
 
@@ -61,6 +63,7 @@ DEPENDENCIES
   pry
   rb-readline
   rspec
+  rubyserial
 
 BUNDLED WITH
    2.2.4
