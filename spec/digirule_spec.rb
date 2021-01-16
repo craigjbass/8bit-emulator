@@ -3,7 +3,7 @@ require 'digirule'
 describe Digirule do
   let(:digirule) do
     digirule = described_class.new 
-    digirule.connect('/dev/ttyS3')
+    digirule.connect(ENV['SERIAL_PORT'])
     digirule
   end
 

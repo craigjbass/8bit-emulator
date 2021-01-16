@@ -2,17 +2,13 @@ require 'rubyserial'
 require 'pry'
 
 class Digirule
-  def initialize
-  end
-
   def connect(device)
     @serial = Serial.new(device, 9600, 8, :none, 1)
     @serial.write("\r")
-    prompt = @serial.read(4)
-    if prompt != "\r\n> "
-      raise 'Not a valid prompt'
+    prompt = @serial.gets("\r\n> ")
+    unless prompt.end_with? "\r\n> "
+      raise "Not a valid prompt #{prompt}"
     end
-    set_program_counter(to="00")
 
     @serial.write("F")
     @serial.gets("? ")
@@ -38,7 +34,7 @@ class Digirule
     unless prompt.end_with?("> ")
       raise 'Hmm'
     end
-    sleep 0.075
+    sleep 0.080
   end
 
   def continue_for(instructions)
@@ -114,9 +110,14 @@ class Digirule
   end
 
   def data_leds
+    ram_at(0xFF)
   end
 
   def address_leds
+    if ram_at(0xFC)[2] == 1
+      return ram_at(0xFE)
+    end
+    program_counter
   end
 
   def program_counter
