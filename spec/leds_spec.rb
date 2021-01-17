@@ -1,4 +1,3 @@
-require 'processor'
 require 'repeat_for_both_implementations'
 
 describe 'LEDs' do
