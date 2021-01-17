@@ -30,7 +30,6 @@ class Assembler
   def self.run(&block)
     assembler = self.create()
     assembler.run(&block)
-    assembler.processor
   end
 
   def self.create
@@ -43,7 +42,9 @@ class Assembler
     instance_eval(&block)
     @end_of_program = @processor.program_counter
     @processor.goto initial
-    @processor.start
+    #@processor.start
+    binding.pry
+    @processor
   end
 
   def label

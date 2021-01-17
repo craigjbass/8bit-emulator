@@ -2,6 +2,10 @@ require 'rubyserial'
 require 'pry'
 
 class Digirule
+  def initialize
+    @send_buffer = []
+  end
+
   def connect(device)
     @serial = Serial.new(device, 9600, 8, :none, 1)
     @serial.write("\r")
@@ -30,6 +34,11 @@ class Digirule
 
   def start
     @serial.write("S")
+    @send_buffer.each do |byte|
+      written = @serial.write(byte.chr)
+      raise if written != 1
+    end
+    @send_buffer = []
     prompt = @serial.gets("\r\n> ")
     unless prompt.end_with?("> ")
       raise 'Hmm'
@@ -44,6 +53,16 @@ class Digirule
   end
 
   def until_finished
+    @serial.write("G")
+    @send_buffer.each do |byte|
+      written = @serial.write(byte.chr)
+      raise if written != 1
+    end
+    prompt = @serial.gets("\r\n> ")
+    unless prompt.end_with?("> ")
+      raise 'Hmm'
+    end
+    sleep 0.080
   end
 
   def goto(address)
@@ -95,9 +114,11 @@ class Digirule
   end
 
   def send_com(byte)
+    @send_buffer << byte
   end
 
   def receive_com
+
   end
 
   def halted?
@@ -129,6 +150,11 @@ class Digirule
   end
 
   def accumulator
+    @serial.write("R")
+    thing = @serial.gets
+    registers = @serial.gets
+    matches = /AC=([A-F0-9]{2})/.match(registers)
+    matches[1].to_i(16) 
   end
 
   private
